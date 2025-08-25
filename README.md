@@ -2,6 +2,15 @@
 
 **Claude AI + Google Sheets + Zapier MCP Integráció**
 
+## 🌐 **LIVE WEBOLDAL**
+
+**📱 iPhone Safari & Minden eszköz:**
+```
+https://davoss22.github.io/My-project/
+```
+
+**🎯 Közvetlen link:** [🏆 Sportstatisztikai Program](https://davoss22.github.io/My-project/)
+
 ## 🚀 Gyors Indítás
 
 ### 1. **Windows felhasználóknak:**
