@@ -762,13 +762,14 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
             sportSection.innerHTML = sportHTML;
         }
 
-        // Konkrét kimenetelek generálása sportágtól függően
+        // Professzionális kimenetelek generálása sportágtól függően
         function getSpecificOutcomes(event) {
             const eventLower = event.toLowerCase();
             
-            // Futball elemzés
+            // Futball elemzés - Professzionális kimenetelek
             if (eventLower.includes('vs') && (eventLower.includes('nb') || eventLower.includes('premier') || eventLower.includes('liga'))) {
                 return [
+                    // EGÉSZ MÉRKŐZÉS KIMENETELEK
                     {
                         name: "1X2 - Hazai Győzelem",
                         risk: Math.random() > 0.6 ? 'low' : 'medium',
@@ -777,18 +778,11 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
                         stats: "Hazai forma: 8/10, Utolsó 5 mérkőzés: 3W-1D-1L"
                     },
                     {
-                        name: "1X2 - Vendég Győzelem",
-                        risk: Math.random() > 0.7 ? 'medium' : 'high',
-                        confidence: Math.floor(Math.random() * 25) + 60,
-                        analysis: "Vendég csapat erős forma, hazai csapat gyengeségek",
-                        stats: "Vendég forma: 7/10, Utolsó 5 mérkőzés: 2W-2D-1L"
-                    },
-                    {
-                        name: "1X2 - Döntetlen",
-                        risk: Math.random() > 0.8 ? 'medium' : 'high',
-                        confidence: Math.floor(Math.random() * 30) + 55,
-                        analysis: "Kiegyensúlyozott csapatok, védekező játék",
-                        stats: "Döntetlen arány: 25%, Utolsó találkozók: 2D-1H-2V"
+                        name: "Mindkét csapat gólt szerez",
+                        risk: Math.random() > 0.4 ? 'low' : 'medium',
+                        confidence: Math.floor(Math.random() * 15) + 80,
+                        analysis: "Támadó játék, mindkét csapat erős támadóvonal",
+                        stats: "BTTS arány: 75%, Utolsó 5 mérkőzés: 4/5 BTTS"
                     },
                     {
                         name: "Összes gól - 2.5 felett",
@@ -798,31 +792,71 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
                         stats: "Átlag gólok: 2.8, Utolsó 5 mérkőzés: 3.2 gól/mérkőzés"
                     },
                     {
-                        name: "Összes gól - 2.5 alatt",
-                        risk: Math.random() > 0.6 ? 'low' : 'medium',
+                        name: "Hazai gólok - 1.5 felett",
+                        risk: Math.random() > 0.6 ? 'medium' : 'high',
                         confidence: Math.floor(Math.random() * 20) + 70,
-                        analysis: "Védekező játék, erős védők mindkét oldalon",
-                        stats: "Átlag gólok: 1.9, Utolsó 5 mérkőzés: 1.6 gól/mérkőzés"
+                        analysis: "Hazai csapat erős támadóvonal, vendég gyenge védelem",
+                        stats: "Hazai átlag: 1.8 gól, Utolsó 5 hazai: 2.2 gól/mérkőzés"
+                    },
+                    
+                    // FÉLIDŐ KIMENETELEK
+                    {
+                        name: "1. félidő - Hazai győzelem",
+                        risk: Math.random() > 0.7 ? 'medium' : 'high',
+                        confidence: Math.floor(Math.random() * 25) + 60,
+                        analysis: "Hazai csapat erős kezdés, vendég lassú indulás",
+                        stats: "1. félidő hazai győzelem: 45%, Utolsó 5: 3/5"
+                    },
+                    {
+                        name: "1. félidő - Döntetlen",
+                        risk: Math.random() > 0.6 ? 'low' : 'medium',
+                        confidence: Math.floor(Math.random() * 20) + 75,
+                        analysis: "Kiegyensúlyozott kezdés, védekező játék",
+                        stats: "1. félidő döntetlen: 35%, Utolsó 5: 2/5"
+                    },
+                    {
+                        name: "1. félidő - 1.5 felett gól",
+                        risk: Math.random() > 0.5 ? 'medium' : 'high',
+                        confidence: Math.floor(Math.random() * 25) + 65,
+                        analysis: "Gyors játék, korai gólok",
+                        stats: "1. félidő átlag: 1.2 gól, Utolsó 5: 1.4 gól/félidő"
+                    },
+                    
+                    // KOMBINÁLT KIMENETELEK
+                    {
+                        name: "Hazai győzelem + 2.5 felett gól",
+                        risk: Math.random() > 0.7 ? 'medium' : 'high',
+                        confidence: Math.floor(Math.random() * 30) + 55,
+                        analysis: "Hazai dominancia, sok gól",
+                        stats: "Kombinált arány: 40%, Utolsó 5: 2/5"
+                    },
+                    {
+                        name: "Mindkét félidőben gól",
+                        risk: Math.random() > 0.6 ? 'medium' : 'high',
+                        confidence: Math.floor(Math.random() * 20) + 70,
+                        analysis: "Folyamatos támadó játék",
+                        stats: "Kombinált arány: 60%, Utolsó 5: 3/5"
+                    },
+                    {
+                        name: "Pontos eredmény: 2-1",
+                        risk: Math.random() > 0.8 ? 'high' : 'high',
+                        confidence: Math.floor(Math.random() * 35) + 45,
+                        analysis: "Hazai győzelem, mindkét csapat gólt szerez",
+                        stats: "2-1 arány: 15%, Utolsó 5: 1/5"
                     }
                 ];
             }
             
-            // Kosárlabda elemzés
+            // Kosárlabda elemzés - Professzionális kimenetelek
             else if (eventLower.includes('kosárlabda') || eventLower.includes('basketball') || eventLower.includes('nba')) {
                 return [
+                    // EGÉSZ MÉRKŐZÉS KIMENETELEK
                     {
                         name: "Hazai Győzelem",
                         risk: Math.random() > 0.5 ? 'low' : 'medium',
                         confidence: Math.floor(Math.random() * 25) + 70,
                         analysis: "Hazai pálya előny, szurkolói támogatás, ismert kosarak",
                         stats: "Hazai forma: 8/10, Utolsó 5 mérkőzés: 4W-1L"
-                    },
-                    {
-                        name: "Vendég Győzelem",
-                        risk: Math.random() > 0.7 ? 'medium' : 'high',
-                        confidence: Math.floor(Math.random() * 30) + 55,
-                        analysis: "Vendég csapat erős forma, hazai csapat gyengeségek",
-                        stats: "Vendég forma: 6/10, Utolsó 5 mérkőzés: 2W-3L"
                     },
                     {
                         name: "Összes pont - 200 felett",
@@ -832,31 +866,71 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
                         stats: "Átlag pontok: 210, Utolsó 5 mérkőzés: 225 pont/mérkőzés"
                     },
                     {
-                        name: "Összes pont - 200 alatt",
+                        name: "Hazai pontok - 100 felett",
                         risk: Math.random() > 0.6 ? 'medium' : 'high',
+                        confidence: Math.floor(Math.random() * 20) + 70,
+                        analysis: "Hazai csapat erős támadóvonal",
+                        stats: "Hazai átlag: 105 pont, Utolsó 5 hazai: 108 pont/mérkőzés"
+                    },
+                    
+                    // NEGYED KIMENETELEK
+                    {
+                        name: "1. negyed - Hazai győzelem",
+                        risk: Math.random() > 0.7 ? 'medium' : 'high',
                         confidence: Math.floor(Math.random() * 25) + 60,
-                        analysis: "Lassú játék, erős védelem, kevés pont",
-                        stats: "Átlag pontok: 185, Utolsó 5 mérkőzés: 175 pont/mérkőzés"
+                        analysis: "Hazai csapat erős kezdés",
+                        stats: "1. negyed hazai győzelem: 55%, Utolsó 5: 3/5"
+                    },
+                    {
+                        name: "1. negyed - 50 felett pont",
+                        risk: Math.random() > 0.5 ? 'medium' : 'high',
+                        confidence: Math.floor(Math.random() * 25) + 65,
+                        analysis: "Gyors játék, korai pontok",
+                        stats: "1. negyed átlag: 52 pont, Utolsó 5: 54 pont/negyed"
+                    },
+                    {
+                        name: "2. negyed - 50 felett pont",
+                        risk: Math.random() > 0.6 ? 'medium' : 'high',
+                        confidence: Math.floor(Math.random() * 20) + 70,
+                        analysis: "Folyamatos támadó játék",
+                        stats: "2. negyed átlag: 48 pont, Utolsó 5: 51 pont/negyed"
+                    },
+                    
+                    // KOMBINÁLT KIMENETELEK
+                    {
+                        name: "Hazai győzelem + 200 felett pont",
+                        risk: Math.random() > 0.7 ? 'medium' : 'high',
+                        confidence: Math.floor(Math.random() * 30) + 55,
+                        analysis: "Hazai dominancia, sok pont",
+                        stats: "Kombinált arány: 45%, Utolsó 5: 2/5"
+                    },
+                    {
+                        name: "Mindkét csapat 90 felett pont",
+                        risk: Math.random() > 0.6 ? 'medium' : 'high',
+                        confidence: Math.floor(Math.random() * 20) + 70,
+                        analysis: "Kiegyensúlyozott, támadó játék",
+                        stats: "Kombinált arány: 65%, Utolsó 5: 4/5"
+                    },
+                    {
+                        name: "Pontos eredmény: 105-95",
+                        risk: Math.random() > 0.8 ? 'high' : 'high',
+                        confidence: Math.floor(Math.random() * 35) + 45,
+                        analysis: "Hazai győzelem, sok pont",
+                        stats: "105-95 arány: 12%, Utolsó 5: 1/5"
                     }
                 ];
             }
             
-            // Tenisz elemzés
+            // Tenisz elemzés - Professzionális kimenetelek
             else if (eventLower.includes('tenisz') || eventLower.includes('roland') || eventLower.includes('djokovic') || eventLower.includes('nadal')) {
                 return [
+                    // EGÉSZ MÉRKŐZÉS KIMENETELEK
                     {
                         name: "1. játékos győzelem",
                         risk: Math.random() > 0.6 ? 'low' : 'medium',
                         confidence: Math.floor(Math.random() * 20) + 75,
                         analysis: "Erős forma, kedvező statisztikák, tapasztalat",
                         stats: "Forma: 9/10, Utolsó 10 mérkőzés: 8W-2L"
-                    },
-                    {
-                        name: "2. játékos győzelem",
-                        risk: Math.random() > 0.7 ? 'medium' : 'high',
-                        confidence: Math.floor(Math.random() * 25) + 60,
-                        analysis: "Változó forma, de potenciál van",
-                        stats: "Forma: 6/10, Utolsó 10 mérkőzés: 5W-5L"
                     },
                     {
                         name: "Összes szett - 2.5 felett",
@@ -866,11 +940,57 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
                         stats: "Átlag szettek: 3.2, Utolsó 5 mérkőzés: 3.5 szett/mérkőzés"
                     },
                     {
-                        name: "Összes szett - 2.5 alatt",
-                        risk: Math.random() > 0.6 ? 'low' : 'medium',
+                        name: "1. játékos - 2-0",
+                        risk: Math.random() > 0.7 ? 'medium' : 'high',
+                        confidence: Math.floor(Math.random() * 25) + 60,
+                        analysis: "1. játékos dominancia, gyors győzelem",
+                        stats: "2-0 arány: 40%, Utolsó 10: 4/10"
+                    },
+                    
+                    // SZETT KIMENETELEK
+                    {
+                        name: "1. szett - 1. játékos",
+                        risk: Math.random() > 0.6 ? 'medium' : 'high',
                         confidence: Math.floor(Math.random() * 20) + 70,
-                        analysis: "Egyoldalú mérkőzés, kevés szett",
-                        stats: "Átlag szettek: 2.1, Utolsó 5 mérkőzés: 2.0 szett/mérkőzés"
+                        analysis: "1. játékos erős kezdés",
+                        stats: "1. szett győzelem: 65%, Utolsó 10: 7/10"
+                    },
+                    {
+                        name: "1. szett - 6-4 vagy jobb",
+                        risk: Math.random() > 0.7 ? 'medium' : 'high',
+                        confidence: Math.floor(Math.random() * 25) + 60,
+                        analysis: "Egyoldalú 1. szett",
+                        stats: "6-4+ arány: 45%, Utolsó 10: 4/10"
+                    },
+                    {
+                        name: "1. szett - Tie-break",
+                        risk: Math.random() > 0.8 ? 'high' : 'high',
+                        confidence: Math.floor(Math.random() * 30) + 50,
+                        analysis: "Kiegyensúlyozott 1. szett",
+                        stats: "Tie-break arány: 25%, Utolsó 10: 2/10"
+                    },
+                    
+                    // KOMBINÁLT KIMENETELEK
+                    {
+                        name: "1. játékos győzelem + 2.5 felett szett",
+                        risk: Math.random() > 0.7 ? 'medium' : 'high',
+                        confidence: Math.floor(Math.random() * 30) + 55,
+                        analysis: "1. játékos győzelem, de nehéz mérkőzés",
+                        stats: "Kombinált arány: 35%, Utolsó 10: 3/10"
+                    },
+                    {
+                        name: "Mindkét játékos nyer szettet",
+                        risk: Math.random() > 0.6 ? 'medium' : 'high',
+                        confidence: Math.floor(Math.random() * 20) + 70,
+                        analysis: "Kiegyensúlyozott mérkőzés",
+                        stats: "Kombinált arány: 70%, Utolsó 10: 7/10"
+                    },
+                    {
+                        name: "Pontos eredmény: 2-1",
+                        risk: Math.random() > 0.8 ? 'high' : 'high',
+                        confidence: Math.floor(Math.random() * 35) + 45,
+                        analysis: "1. játékos győzelem, de 3 szettben",
+                        stats: "2-1 arány: 30%, Utolsó 10: 3/10"
                     }
                 ];
             }
