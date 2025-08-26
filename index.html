@@ -609,6 +609,12 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
 
             document.getElementById('dataInput').value = testEvents.join('\n');
             addLog(`🎲 ${testEvents.length} teszt esemény generálva`, 'success');
+            
+            // Automatikus elemzés indítása teszt adatokkal
+            setTimeout(() => {
+                addLog('🚀 Automatikus elemzés indítása teszt adatokkal...', 'info');
+                analyzeData();
+            }, 1000);
         }
 
         // Claude elemzés teszt
@@ -752,18 +758,25 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
             const lines = input.split('\n').filter(line => line.trim());
             addLog(`🔍 ${lines.length} sportesemény elemzésének indítása...`, 'info');
 
-            // Eredmények megjelenítése
+            // Eredmények megjelenítése - MINDIG működik!
             setTimeout(() => {
+                // Mindig megjelenítjük az eredményeket
+                displaySportResults(lines);
+                
                 if (integrations.claude.active) {
                     addLog('🤖 Claude MCP elemzés választva (PRO mód)', 'claude');
                     displayClaudeResults();
-                    displaySportResults(lines);
                     addLog('✅ Claude elemzés befejezve', 'claude');
                 } else {
-                    addLog('🧪 Hagyományos elemzés használata', 'warning');
-                    displaySportResults(lines);
+                    addLog('🧪 Hagyományos elemzés használata', 'info');
                     addLog('✅ Hagyományos elemzés befejezve', 'success');
                 }
+                
+                // Eredmények megjelenítése és görgetés
+                const container = document.getElementById('resultsContainer');
+                container.classList.add('active');
+                container.scrollIntoView({ behavior: 'smooth' });
+                
             }, 2000);
         }
 
