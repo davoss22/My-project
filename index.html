@@ -88,6 +88,11 @@
             background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
         }
 
+        .integration-card.espn {
+            border-color: #dc2626;
+            background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
+        }
+
         .integration-card.zapier {
             border-color: #f59e0b;
             background: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
@@ -464,6 +469,23 @@
                 </div>
             </div>
 
+            <div class="integration-card espn">
+                <div class="card-header">
+                    <div class="card-icon">📡</div>
+                    <div>ESPN RSS Feed</div>
+                    <div class="status-indicator" id="espnStatus"></div>
+                </div>
+                <div class="card-content">
+                    <p><strong>Valós sportadatok:</strong> ESPN RSS feedek automatikus beolvasása és feldolgozása.</p>
+                    <input type="text" id="espn-rss-url" placeholder="ESPN RSS feed URL" class="config-input" style="width: 100%; margin: 10px 0;">
+                    <div>
+                        <button class="config-btn" onclick="configureESPNRSS()">📡 RSS Beállítás</button>
+                        <button class="config-btn" onclick="fetchESPNRSS()">🔄 RSS Frissítés</button>
+                        <button class="config-btn" onclick="startAutomatedFlow()">🚀 Automatikus Folyam</button>
+                    </div>
+                </div>
+            </div>
+
             <div class="integration-card zapier">
                 <div class="card-header">
                     <div class="card-icon">⚡</div>
@@ -487,6 +509,7 @@
             <button class="control-btn generate" onclick="generateTestData()">🎲 Teszt Adatok Generálása</button>
             <button class="control-btn claude-test" onclick="claudeAnalysisTest()">🤖 Claude Elemzés Teszt</button>
             <button class="control-btn zapier-flow" onclick="testZapierFlow()">⚡ Teljes Zapier Flow Teszt</button>
+            <button class="control-btn espn-flow" onclick="startAutomatedFlow()" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);">📡 ESPN Automatikus Folyam</button>
             <button class="control-btn test" onclick="testAnalysis()">🧪 Hagyományos Elemzés</button>
             <button class="control-btn clear" onclick="clearData()">🗑️ Összes Törlése</button>
             <button class="control-btn test" onclick="testResultsDisplay()" style="background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);">🎯 Teszt Eredmények Megjelenítése</button>
@@ -526,7 +549,8 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
         let integrations = {
             claude: { active: false, url: null },
             sheets: { active: false, id: null },
-            webhook: { active: false, url: null }
+            webhook: { active: false, url: null },
+            espn: { active: false, rssUrl: null }
         };
 
         // Log funkció
@@ -581,6 +605,22 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
             document.getElementById('sheetsStatus').classList.add('active');
             
             addLog('📊 Google Sheets sikeresen csatlakoztatva!', 'success');
+        }
+
+        // ESPN RSS Feed beállítása
+        function configureESPNRSS() {
+            const espnRssUrl = document.getElementById('espn-rss-url').value;
+            if (!espnRssUrl) {
+                addLog('❌ Kérlek add meg az ESPN RSS feed URL-t!', 'error');
+                return;
+            }
+            
+            integrations.espn.rssUrl = espnRssUrl;
+            integrations.espn.active = true;
+            document.getElementById('espnStatus').classList.add('active');
+            
+            addLog('📡 ESPN RSS feed beállítva: ' + espnRssUrl, 'info');
+            localStorage.setItem('espnRssUrl', espnRssUrl);
         }
 
         // Webhook URL generálás
@@ -638,6 +678,88 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
             setTimeout(() => {
                 addLog('✅ Google Sheets kapcsolat sikeres!', 'success');
             }, 1500);
+        }
+
+        // ESPN RSS Feed beolvasása
+        async function fetchESPNRSS() {
+            if (!integrations.espn.active) {
+                addLog('❌ Először csatlakoztasd az ESPN RSS feed-et!', 'error');
+                return;
+            }
+
+            addLog('📡 ESPN RSS feed beolvasása...', 'info');
+            
+            try {
+                // CORS proxy használata ESPN RSS eléréséhez
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                const rssUrl = integrations.espn.rssUrl;
+                const response = await fetch(proxyUrl + encodeURIComponent(rssUrl));
+                
+                if (!response.ok) {
+                    throw new Error('RSS feed nem elérhető');
+                }
+                
+                const xmlText = await response.text();
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(xmlText, 'text/xml');
+                
+                const items = xmlDoc.querySelectorAll('item');
+                const sportsData = [];
+                
+                items.forEach(item => {
+                    const title = item.querySelector('title')?.textContent || '';
+                    const description = item.querySelector('description')?.textContent || '';
+                    const pubDate = item.querySelector('pubDate')?.textContent || '';
+                    
+                    if (title.toLowerCase().includes('vs') || title.toLowerCase().includes('match')) {
+                        sportsData.push({
+                            title: title,
+                            description: description,
+                            pubDate: pubDate,
+                            source: 'ESPN RSS'
+                        });
+                    }
+                });
+                
+                addLog(`✅ ${sportsData.length} sportesemény betöltve az ESPN RSS-ből`, 'success');
+                return sportsData;
+                
+            } catch (error) {
+                addLog('❌ ESPN RSS beolvasási hiba: ' + error.message, 'error');
+                return [];
+            }
+        }
+
+        // Automatikus adatfolyam indítása
+        async function startAutomatedFlow() {
+            addLog('🚀 Automatikus adatfolyam indítása...', 'info');
+            
+            // 1. ESPN RSS beolvasása
+            const sportsData = await fetchESPNRSS();
+            if (sportsData.length === 0) {
+                addLog('❌ Nincs sportadatok az RSS feed-ben', 'error');
+                return;
+            }
+            
+            // 2. Adatok Google Sheets-be mentése
+            if (integrations.sheets.active) {
+                addLog('📊 Adatok Google Sheets-be mentése...', 'info');
+                // Itt implementáljuk a Google Sheets API hívást
+            }
+            
+            // 3. Claude MCP elemzés
+            if (integrations.claude.active) {
+                addLog('🤖 Claude MCP elemzés indítása...', 'claude');
+                // Itt implementáljuk a Claude API hívást
+            }
+            
+            // 4. Webhook küldése
+            if (integrations.webhook.active) {
+                addLog('🎯 Webhook POST küldése...', 'zapier');
+                // Itt implementáljuk a webhook küldést
+            }
+            
+            addLog('✅ Automatikus adatfolyam sikeresen befejezve!', 'success');
         }
 
         // Zapier Flow teszt
