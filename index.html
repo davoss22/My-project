@@ -265,10 +265,19 @@
             background: linear-gradient(135deg, #2d5016 0%, #4a9c3d 100%);
             color: white;
             padding: 30px;
+            margin: 20px;
+            border-radius: 15px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.3);
         }
 
         .results-container.active {
-            display: block;
+            display: block !important;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .claude-analysis {
@@ -424,6 +433,7 @@
             <button class="control-btn zapier-flow" onclick="testZapierFlow()">⚡ Teljes Zapier Flow Teszt</button>
             <button class="control-btn test" onclick="testAnalysis()">🧪 Hagyományos Elemzés</button>
             <button class="control-btn clear" onclick="clearData()">🗑️ Összes Törlése</button>
+            <button class="control-btn test" onclick="testResultsDisplay()" style="background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);">🎯 Teszt Eredmények Megjelenítése</button>
         </div>
 
         <div class="realtime-log" id="realtimeLog">
@@ -760,24 +770,74 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
 
             // Eredmények megjelenítése - MINDIG működik!
             setTimeout(() => {
-                // Mindig megjelenítjük az eredményeket
-                displaySportResults(lines);
-                
-                if (integrations.claude.active) {
-                    addLog('🤖 Claude MCP elemzés választva (PRO mód)', 'claude');
-                    displayClaudeResults();
-                    addLog('✅ Claude elemzés befejezve', 'claude');
-                } else {
-                    addLog('🧪 Hagyományos elemzés használata', 'info');
-                    addLog('✅ Hagyományos elemzés befejezve', 'success');
+                try {
+                    // Debug: Ellenőrizzük, hogy létezik-e a container
+                    const container = document.getElementById('resultsContainer');
+                    if (!container) {
+                        addLog('❌ Hiba: resultsContainer nem található!', 'error');
+                        return;
+                    }
+                    
+                    addLog('🔧 Debug: Container megtalálva, eredmények megjelenítése...', 'info');
+                    
+                    // Mindig megjelenítjük az eredményeket
+                    displaySportResults(lines);
+                    
+                    if (integrations.claude.active) {
+                        addLog('🤖 Claude MCP elemzés választva (PRO mód)', 'claude');
+                        displayClaudeResults();
+                        addLog('✅ Claude elemzés befejezve', 'claude');
+                    } else {
+                        addLog('🧪 Hagyományos elemzés használata', 'info');
+                        addLog('✅ Hagyományos elemzés befejezve', 'success');
+                    }
+                    
+                    // Eredmények megjelenítése és görgetés
+                    container.classList.add('active');
+                    container.style.display = 'block';
+                    container.scrollIntoView({ behavior: 'smooth' });
+                    
+                    addLog('✅ Elemzés eredmények megjelenítve!', 'success');
+                    
+                } catch (error) {
+                    addLog(`❌ Hiba az elemzés során: ${error.message}`, 'error');
                 }
                 
-                // Eredmények megjelenítése és görgetés
+            }, 2000);
+        }
+
+        // Teszt eredmények megjelenítése
+        function testResultsDisplay() {
+            addLog('🎯 Teszt eredmények megjelenítése...', 'info');
+            
+            const testEvents = [
+                "Teszt esemény 1",
+                "Teszt esemény 2",
+                "Teszt esemény 3"
+            ];
+            
+            try {
                 const container = document.getElementById('resultsContainer');
+                if (!container) {
+                    addLog('❌ Hiba: resultsContainer nem található!', 'error');
+                    return;
+                }
+                
+                addLog('🔧 Debug: Container megtalálva', 'info');
+                
+                // Eredmények megjelenítése
+                displaySportResults(testEvents);
+                
+                // Container megjelenítése
                 container.classList.add('active');
+                container.style.display = 'block';
                 container.scrollIntoView({ behavior: 'smooth' });
                 
-            }, 2000);
+                addLog('✅ Teszt eredmények megjelenítve!', 'success');
+                
+            } catch (error) {
+                addLog(`❌ Hiba: ${error.message}`, 'error');
+            }
         }
 
         // Inicializálás
