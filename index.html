@@ -802,7 +802,7 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
             }
         }
 
-        // Sportág felismerése
+        // Sportág felismerése RSS adatokból
         function detectSportType(title, description, rssType) {
             const text = (title + ' ' + description).toLowerCase();
             
@@ -814,6 +814,91 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
                 return 'tennis';
             } else if (text.includes('hockey') || text.includes('jégkorong') || rssType.includes('hockey')) {
                 return 'hockey';
+            }
+            
+            return 'unknown';
+        }
+
+        // Sportág felismerése mérkőzés nevéből
+        function detectSportTypeFromEvent(event) {
+            const eventLower = event.toLowerCase();
+            
+            // Debug: sportág felismerés log
+            addLog(`🔍 Sportág felismerés: "${event}"`, 'info');
+            
+            // Kosárlabda kulcsszavak
+            if (eventLower.includes('nba') || 
+                eventLower.includes('basketball') || 
+                eventLower.includes('kosárlabda') ||
+                eventLower.includes('lakers') ||
+                eventLower.includes('celtics') ||
+                eventLower.includes('bulls') ||
+                eventLower.includes('warriors') ||
+                eventLower.includes('heat') ||
+                eventLower.includes('knicks') ||
+                eventLower.includes('euroleague') ||
+                eventLower.includes('fiba') ||
+                eventLower.includes('basketball')) {
+                addLog(`🏀 Kosárlabda felismerve: "${event}"`, 'success');
+                return 'basketball';
+            }
+            
+            // Futball kulcsszavak
+            else if (eventLower.includes('premier') || 
+                     eventLower.includes('liga') || 
+                     eventLower.includes('champions') ||
+                     eventLower.includes('europa') ||
+                     eventLower.includes('bundesliga') ||
+                     eventLower.includes('serie a') ||
+                     eventLower.includes('la liga') ||
+                     eventLower.includes('nb i') ||
+                     eventLower.includes('ferencváros') ||
+                     eventLower.includes('mtk') ||
+                     eventLower.includes('újpest') ||
+                     eventLower.includes('honvéd') ||
+                     eventLower.includes('debrecen') ||
+                     eventLower.includes('paks')) {
+                addLog(`⚽ Futball felismerve: "${event}"`, 'success');
+                return 'football';
+            }
+            
+            // Tenisz kulcsszavak
+            else if (eventLower.includes('tennis') || 
+                     eventLower.includes('tenisz') ||
+                     eventLower.includes('roland') ||
+                     eventLower.includes('wimbledon') ||
+                     eventLower.includes('us open') ||
+                     eventLower.includes('australian open') ||
+                     eventLower.includes('djokovic') ||
+                     eventLower.includes('nadal') ||
+                     eventLower.includes('federer') ||
+                     eventLower.includes('atp') ||
+                     eventLower.includes('wta')) {
+                addLog(`🎾 Tenisz felismerve: "${event}"`, 'success');
+                return 'tennis';
+            }
+            
+            // Jégkorong kulcsszavak
+            else if (eventLower.includes('hockey') || 
+                     eventLower.includes('jégkorong') ||
+                     eventLower.includes('nhl') ||
+                     eventLower.includes('ice hockey') ||
+                     eventLower.includes('bruins') ||
+                     eventLower.includes('rangers') ||
+                     eventLower.includes('blackhawks') ||
+                     eventLower.includes('red wings')) {
+                addLog(`🏒 Jégkorong felismerve: "${event}"`, 'success');
+                return 'hockey';
+            }
+            
+            // Kézilabda kulcsszavak
+            else if (eventLower.includes('handball') || 
+                     eventLower.includes('kézilabda') ||
+                     eventLower.includes('veszprém') ||
+                     eventLower.includes('szeged') ||
+                     eventLower.includes('pick')) {
+                addLog(`🤾 Kézilabda felismerve: "${event}"`, 'success');
+                return 'handball';
             }
             
             return 'unknown';
@@ -1020,8 +1105,11 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
         function getSpecificOutcomes(event) {
             const eventLower = event.toLowerCase();
             
+            // Sportág felismerése a mérkőzés neve alapján
+            const sportType = detectSportTypeFromEvent(event);
+            
             // Futball elemzés - Professzionális kimenetelek
-            if (eventLower.includes('vs') && (eventLower.includes('nb') || eventLower.includes('premier') || eventLower.includes('liga'))) {
+            if (sportType === 'football' || (eventLower.includes('vs') && (eventLower.includes('nb') || eventLower.includes('premier') || eventLower.includes('liga') || eventLower.includes('champions') || eventLower.includes('europa')))) {
                 const allOutcomes = [
                     // ALAP KIMENETELEK
                     {
@@ -1166,7 +1254,7 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
             }
             
             // Kosárlabda elemzés - Professzionális kimenetelek
-            else if (eventLower.includes('kosárlabda') || eventLower.includes('basketball') || eventLower.includes('nba')) {
+            else if (sportType === 'basketball' || eventLower.includes('kosárlabda') || eventLower.includes('basketball') || eventLower.includes('nba')) {
                 const allOutcomes = [
                     // ALAP KIMENETELEK
                     {
@@ -1259,7 +1347,7 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
             }
             
             // Tenisz elemzés - Professzionális kimenetelek
-            else if (eventLower.includes('tenisz') || eventLower.includes('roland') || eventLower.includes('djokovic') || eventLower.includes('nadal')) {
+            else if (sportType === 'tennis' || eventLower.includes('tenisz') || eventLower.includes('roland') || eventLower.includes('djokovic') || eventLower.includes('nadal')) {
                 return [
                     // EGÉSZ MÉRKŐZÉS KIMENETELEK
                     {
@@ -1333,7 +1421,7 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
             }
             
             // Jégkorong elemzés - Professzionális kimenetelek
-            else if (eventLower.includes('jégkorong') || eventLower.includes('hockey') || eventLower.includes('ice hockey')) {
+            else if (sportType === 'hockey' || eventLower.includes('jégkorong') || eventLower.includes('hockey') || eventLower.includes('ice hockey')) {
                 const allOutcomes = [
                     // ALAP KIMENETELEK
                     {
@@ -1425,7 +1513,7 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
             }
             
             // Kézilabda elemzés
-            else if (eventLower.includes('kézilabda') || eventLower.includes('handball')) {
+            else if (sportType === 'handball' || eventLower.includes('kézilabda') || eventLower.includes('handball')) {
                 return [
                     {
                         name: "Hazai Győzelem",
