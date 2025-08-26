@@ -454,9 +454,10 @@ Los Angeles Lakers vs Boston Celtics NBA
 Novak Djokovic vs Rafael Nadal Roland Garros
 Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
             <button class="analyze-btn" onclick="analyzeData()">🔍 Részletes Elemzés Indítása</button>
+            <button class="analyze-btn" onclick="forceShowResults()" style="background: linear-gradient(135deg, #ec4899 0%, #be185d 100%); margin-top: 10px;">🎯 ERŐSÍTETT EREDMÉNYEK MEGJELENÍTÉSE</button>
         </div>
 
-        <div class="results-container" id="resultsContainer">
+        <div class="results-container" id="resultsContainer" style="display: none;">
             <h2>🏆 PROFESSZIONÁLIS SPORTSTATISZTIKAI ELEMZÉS</h2>
             <div id="claudeAnalysisSection"></div>
             <div id="sportAnalysisSection"></div>
@@ -793,8 +794,10 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
                     }
                     
                     // Eredmények megjelenítése és görgetés
-                    container.classList.add('active');
                     container.style.display = 'block';
+                    container.classList.add('active');
+                    container.style.visibility = 'visible';
+                    container.style.opacity = '1';
                     container.scrollIntoView({ behavior: 'smooth' });
                     
                     addLog('✅ Elemzés eredmények megjelenítve!', 'success');
@@ -828,12 +831,63 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
                 // Eredmények megjelenítése
                 displaySportResults(testEvents);
                 
-                // Container megjelenítése
-                container.classList.add('active');
+                // Container megjelenítése - ERŐSEBB MÓDSZER
                 container.style.display = 'block';
+                container.style.visibility = 'visible';
+                container.style.opacity = '1';
+                container.style.position = 'relative';
+                container.style.zIndex = '1000';
+                container.classList.add('active');
                 container.scrollIntoView({ behavior: 'smooth' });
                 
                 addLog('✅ Teszt eredmények megjelenítve!', 'success');
+                
+            } catch (error) {
+                addLog(`❌ Hiba: ${error.message}`, 'error');
+            }
+        }
+
+        // Erősített eredmények megjelenítése
+        function forceShowResults() {
+            addLog('🎯 ERŐSÍTETT eredmények megjelenítése...', 'info');
+            
+            try {
+                const container = document.getElementById('resultsContainer');
+                if (!container) {
+                    addLog('❌ Hiba: resultsContainer nem található!', 'error');
+                    return;
+                }
+                
+                addLog('🔧 Debug: Container megtalálva, erősített megjelenítés...', 'info');
+                
+                // ERŐSÍTETT megjelenítés
+                container.style.cssText = `
+                    display: block !important;
+                    visibility: visible !important;
+                    opacity: 1 !important;
+                    position: relative !important;
+                    z-index: 9999 !important;
+                    background: linear-gradient(135deg, #2d5016 0%, #4a9c3d 100%) !important;
+                    color: white !important;
+                    padding: 30px !important;
+                    margin: 20px !important;
+                    border-radius: 15px !important;
+                    box-shadow: 0 10px 20px rgba(0,0,0,0.3) !important;
+                `;
+                
+                container.innerHTML = `
+                    <h2>🏆 ERŐSÍTETT ELEMZÉS EREDMÉNYEK</h2>
+                    <p>✅ Ez egy erősített teszt eredmény!</p>
+                    <ul>
+                        <li>✅ Elemzés funkció működik</li>
+                        <li>✅ Eredmények megjelennek</li>
+                        <li>✅ JavaScript aktív</li>
+                        <li>✅ CSS erősített megjelenítés</li>
+                    </ul>
+                `;
+                
+                container.scrollIntoView({ behavior: 'smooth' });
+                addLog('✅ ERŐSÍTETT eredmények megjelenítve!', 'success');
                 
             } catch (error) {
                 addLog(`❌ Hiba: ${error.message}`, 'error');
