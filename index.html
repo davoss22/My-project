@@ -382,6 +382,28 @@
         .risk-low { background: #10b981; }
         .risk-medium { background: #f59e0b; }
         .risk-high { background: #ef4444; }
+        .risk-extreme { 
+            background: linear-gradient(45deg, #dc2626, #7c2d12);
+            color: white;
+            animation: pulse-extreme 2s infinite;
+            box-shadow: 0 0 10px rgba(220, 38, 38, 0.5);
+        }
+
+        @keyframes pulse-extreme {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.05); }
+        }
+
+        .outcome-item.extreme {
+            border-left: 4px solid #dc2626;
+            background: linear-gradient(135deg, rgba(220, 38, 38, 0.1), rgba(124, 45, 18, 0.1));
+            box-shadow: 0 0 15px rgba(220, 38, 38, 0.2);
+        }
+
+        .outcome-item.extreme h5 {
+            color: #dc2626;
+            font-weight: bold;
+        }
 
         @media (max-width: 768px) {
             .integration-grid {
@@ -736,11 +758,16 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
                 
                 outcomes.forEach(outcome => {
                     const riskLevel = outcome.risk;
-                    const riskText = riskLevel === 'low' ? 'ALACSONY' : riskLevel === 'medium' ? 'KÖZEPES' : 'MAGAS';
+                    const riskText = riskLevel === 'low' ? 'ALACSONY' : 
+                                   riskLevel === 'medium' ? 'KÖZEPES' : 
+                                   riskLevel === 'high' ? 'MAGAS' : 'EXTRÉM';
+                    
+                    const extremeClass = outcome.extreme ? 'extreme' : '';
+                    const extremeIcon = outcome.extreme ? '🔥' : '🎯';
                     
                     sportHTML += `
-                        <div class="outcome-item">
-                            <h5>🎯 ${outcome.name}</h5>
+                        <div class="outcome-item ${extremeClass}">
+                            <h5>${extremeIcon} ${outcome.name}</h5>
                             <p><strong>Kockázati szint:</strong> <span class="risk-level risk-${riskLevel}">${riskText}</span></p>
                             <p><strong>Bizalmi szint:</strong> ${outcome.confidence}%</p>
                             <p><strong>Elemzés:</strong> ${outcome.analysis}</p>
@@ -768,157 +795,240 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
             
             // Futball elemzés - Professzionális kimenetelek
             if (eventLower.includes('vs') && (eventLower.includes('nb') || eventLower.includes('premier') || eventLower.includes('liga'))) {
-                return [
-                    // EGÉSZ MÉRKŐZÉS KIMENETELEK
+                const allOutcomes = [
+                    // ALAP KIMENETELEK
                     {
                         name: "1X2 - Hazai Győzelem",
-                        risk: Math.random() > 0.6 ? 'low' : 'medium',
-                        confidence: Math.floor(Math.random() * 20) + 75,
-                        analysis: "Hazai pálya előny, szurkolói támogatás, ismert környezet",
-                        stats: "Hazai forma: 8/10, Utolsó 5 mérkőzés: 3W-1D-1L"
+                        risk: 'low',
+                        confidence: 75,
+                        analysis: "Hazai pálya előny, szurkolói támogatás",
+                        stats: "Hazai forma: 8/10, Utolsó 5: 3W-1D-1L",
+                        category: "basic"
                     },
                     {
+                        name: "1X2 - Vendég Győzelem",
+                        risk: 'medium',
+                        confidence: 60,
+                        analysis: "Vendég csapat erős forma",
+                        stats: "Vendég forma: 7/10, Utolsó 5: 2W-2D-1L",
+                        category: "basic"
+                    },
+                    {
+                        name: "1X2 - Döntetlen",
+                        risk: 'medium',
+                        confidence: 55,
+                        analysis: "Kiegyensúlyozott csapatok",
+                        stats: "Döntetlen arány: 25%, Utolsó 5: 1D-2H-2V",
+                        category: "basic"
+                    },
+                    
+                    // GÓL KIMENETELEK
+                    {
                         name: "Mindkét csapat gólt szerez",
-                        risk: Math.random() > 0.4 ? 'low' : 'medium',
-                        confidence: Math.floor(Math.random() * 15) + 80,
+                        risk: 'low',
+                        confidence: 80,
                         analysis: "Támadó játék, mindkét csapat erős támadóvonal",
-                        stats: "BTTS arány: 75%, Utolsó 5 mérkőzés: 4/5 BTTS"
+                        stats: "BTTS arány: 75%, Utolsó 5: 4/5 BTTS",
+                        category: "goals"
                     },
                     {
                         name: "Összes gól - 2.5 felett",
-                        risk: Math.random() > 0.5 ? 'medium' : 'high',
-                        confidence: Math.floor(Math.random() * 25) + 65,
-                        analysis: "Támadó játék, gyenge védelem mindkét oldalon",
-                        stats: "Átlag gólok: 2.8, Utolsó 5 mérkőzés: 3.2 gól/mérkőzés"
+                        risk: 'medium',
+                        confidence: 65,
+                        analysis: "Támadó játék, gyenge védelem",
+                        stats: "Átlag gólok: 2.8, Utolsó 5: 3.2 gól/mérkőzés",
+                        category: "goals"
                     },
                     {
-                        name: "Hazai gólok - 1.5 felett",
-                        risk: Math.random() > 0.6 ? 'medium' : 'high',
-                        confidence: Math.floor(Math.random() * 20) + 70,
-                        analysis: "Hazai csapat erős támadóvonal, vendég gyenge védelem",
-                        stats: "Hazai átlag: 1.8 gól, Utolsó 5 hazai: 2.2 gól/mérkőzés"
+                        name: "Összes gól - 1.5 alatt",
+                        risk: 'high',
+                        confidence: 45,
+                        analysis: "Védekező játék, erős védők",
+                        stats: "Átlag gólok: 1.2, Utolsó 5: 1.0 gól/mérkőzés",
+                        category: "goals"
                     },
                     
                     // FÉLIDŐ KIMENETELEK
                     {
                         name: "1. félidő - Hazai győzelem",
-                        risk: Math.random() > 0.7 ? 'medium' : 'high',
-                        confidence: Math.floor(Math.random() * 25) + 60,
-                        analysis: "Hazai csapat erős kezdés, vendég lassú indulás",
-                        stats: "1. félidő hazai győzelem: 45%, Utolsó 5: 3/5"
+                        risk: 'medium',
+                        confidence: 60,
+                        analysis: "Hazai csapat erős kezdés",
+                        stats: "1. félidő hazai: 45%, Utolsó 5: 3/5",
+                        category: "half"
                     },
                     {
                         name: "1. félidő - Döntetlen",
-                        risk: Math.random() > 0.6 ? 'low' : 'medium',
-                        confidence: Math.floor(Math.random() * 20) + 75,
-                        analysis: "Kiegyensúlyozott kezdés, védekező játék",
-                        stats: "1. félidő döntetlen: 35%, Utolsó 5: 2/5"
-                    },
-                    {
-                        name: "1. félidő - 1.5 felett gól",
-                        risk: Math.random() > 0.5 ? 'medium' : 'high',
-                        confidence: Math.floor(Math.random() * 25) + 65,
-                        analysis: "Gyors játék, korai gólok",
-                        stats: "1. félidő átlag: 1.2 gól, Utolsó 5: 1.4 gól/félidő"
+                        risk: 'low',
+                        confidence: 75,
+                        analysis: "Kiegyensúlyozott kezdés",
+                        stats: "1. félidő döntetlen: 35%, Utolsó 5: 2/5",
+                        category: "half"
                     },
                     
-                    // KOMBINÁLT KIMENETELEK
+                    // KÁRTYÁK ÉS SZABÁLYSÉRTEK
                     {
-                        name: "Hazai győzelem + 2.5 felett gól",
-                        risk: Math.random() > 0.7 ? 'medium' : 'high',
-                        confidence: Math.floor(Math.random() * 30) + 55,
-                        analysis: "Hazai dominancia, sok gól",
-                        stats: "Kombinált arány: 40%, Utolsó 5: 2/5"
+                        name: "Összes sárga kártya - 4.5 felett",
+                        risk: 'medium',
+                        confidence: 70,
+                        analysis: "Intenzív játék, sok szabálysértés",
+                        stats: "Átlag sárga: 5.2, Utolsó 5: 5.8 kártya/mérkőzés",
+                        category: "cards"
                     },
                     {
-                        name: "Mindkét félidőben gól",
-                        risk: Math.random() > 0.6 ? 'medium' : 'high',
-                        confidence: Math.floor(Math.random() * 20) + 70,
-                        analysis: "Folyamatos támadó játék",
-                        stats: "Kombinált arány: 60%, Utolsó 5: 3/5"
+                        name: "Piros kártya - Igen",
+                        risk: 'high',
+                        confidence: 35,
+                        analysis: "Intenzív derbi, magas kockázat",
+                        stats: "Piros kártya arány: 15%, Utolsó 5: 1/5",
+                        category: "cards"
+                    },
+                    
+                    // SZÖGLETEK
+                    {
+                        name: "Összes szöglet - 9.5 felett",
+                        risk: 'medium',
+                        confidence: 65,
+                        analysis: "Támadó játék, sok szöglet",
+                        stats: "Átlag szöglet: 10.5, Utolsó 5: 11.2 szöglet/mérkőzés",
+                        category: "corners"
                     },
                     {
-                        name: "Pontos eredmény: 2-1",
-                        risk: Math.random() > 0.8 ? 'high' : 'high',
-                        confidence: Math.floor(Math.random() * 35) + 45,
-                        analysis: "Hazai győzelem, mindkét csapat gólt szerez",
-                        stats: "2-1 arány: 15%, Utolsó 5: 1/5"
+                        name: "Hazai szögelek - 5.5 felett",
+                        risk: 'medium',
+                        confidence: 60,
+                        analysis: "Hazai támadó dominancia",
+                        stats: "Hazai átlag: 6.2, Utolsó 5: 6.8 szöglet/mérkőzés",
+                        category: "corners"
+                    },
+                    
+                    // EXTRÉM KIMENETELEK
+                    {
+                        name: "Vendég győzelem + 0 gól",
+                        risk: 'extreme',
+                        confidence: 25,
+                        analysis: "EXTRÉM: Vendég győzelem gól nélkül",
+                        stats: "Extrém kimenetel: 5%, Utolsó 20: 1/20",
+                        category: "extreme",
+                        extreme: true
+                    },
+                    {
+                        name: "Döntetlen + 0-0",
+                        risk: 'extreme',
+                        confidence: 20,
+                        analysis: "EXTRÉM: Gól nélküli döntetlen",
+                        stats: "Extrém kimenetel: 8%, Utolsó 20: 2/20",
+                        category: "extreme",
+                        extreme: true
+                    },
+                    {
+                        name: "Hazai vereség + 3+ gól",
+                        risk: 'extreme',
+                        confidence: 15,
+                        analysis: "EXTRÉM: Hazai vereség sok góllal",
+                        stats: "Extrém kimenetel: 3%, Utolsó 20: 1/20",
+                        category: "extreme",
+                        extreme: true
                     }
                 ];
+                
+                // Csak a legvalószínűbb és extrém kimeneteleket adjuk vissza
+                return allOutcomes.filter(outcome => 
+                    outcome.confidence > 60 || outcome.extreme
+                ).slice(0, 8); // Maximum 8 kimenetel
             }
             
             // Kosárlabda elemzés - Professzionális kimenetelek
             else if (eventLower.includes('kosárlabda') || eventLower.includes('basketball') || eventLower.includes('nba')) {
-                return [
-                    // EGÉSZ MÉRKŐZÉS KIMENETELEK
+                const allOutcomes = [
+                    // ALAP KIMENETELEK
                     {
                         name: "Hazai Győzelem",
-                        risk: Math.random() > 0.5 ? 'low' : 'medium',
-                        confidence: Math.floor(Math.random() * 25) + 70,
-                        analysis: "Hazai pálya előny, szurkolói támogatás, ismert kosarak",
-                        stats: "Hazai forma: 8/10, Utolsó 5 mérkőzés: 4W-1L"
+                        risk: 'low',
+                        confidence: 70,
+                        analysis: "Hazai pálya előny, szurkolói támogatás",
+                        stats: "Hazai forma: 8/10, Utolsó 5: 4W-1L",
+                        category: "basic"
                     },
+                    {
+                        name: "Vendég Győzelem",
+                        risk: 'medium',
+                        confidence: 55,
+                        analysis: "Vendég csapat erős forma",
+                        stats: "Vendég forma: 6/10, Utolsó 5: 2W-3L",
+                        category: "basic"
+                    },
+                    
+                    // PONT KIMENETELEK
                     {
                         name: "Összes pont - 200 felett",
-                        risk: Math.random() > 0.4 ? 'low' : 'medium',
-                        confidence: Math.floor(Math.random() * 20) + 75,
+                        risk: 'low',
+                        confidence: 75,
                         analysis: "Gyors játék, sok pont, gyenge védelem",
-                        stats: "Átlag pontok: 210, Utolsó 5 mérkőzés: 225 pont/mérkőzés"
+                        stats: "Átlag pontok: 210, Utolsó 5: 225 pont/mérkőzés",
+                        category: "points"
                     },
                     {
-                        name: "Hazai pontok - 100 felett",
-                        risk: Math.random() > 0.6 ? 'medium' : 'high',
-                        confidence: Math.floor(Math.random() * 20) + 70,
-                        analysis: "Hazai csapat erős támadóvonal",
-                        stats: "Hazai átlag: 105 pont, Utolsó 5 hazai: 108 pont/mérkőzés"
+                        name: "Összes pont - 180 alatt",
+                        risk: 'high',
+                        confidence: 40,
+                        analysis: "Lassú játék, erős védelem",
+                        stats: "Átlag pontok: 175, Utolsó 5: 170 pont/mérkőzés",
+                        category: "points"
                     },
                     
                     // NEGYED KIMENETELEK
                     {
                         name: "1. negyed - Hazai győzelem",
-                        risk: Math.random() > 0.7 ? 'medium' : 'high',
-                        confidence: Math.floor(Math.random() * 25) + 60,
+                        risk: 'medium',
+                        confidence: 60,
                         analysis: "Hazai csapat erős kezdés",
-                        stats: "1. negyed hazai győzelem: 55%, Utolsó 5: 3/5"
+                        stats: "1. negyed hazai: 55%, Utolsó 5: 3/5",
+                        category: "quarter"
                     },
                     {
                         name: "1. negyed - 50 felett pont",
-                        risk: Math.random() > 0.5 ? 'medium' : 'high',
-                        confidence: Math.floor(Math.random() * 25) + 65,
+                        risk: 'medium',
+                        confidence: 65,
                         analysis: "Gyors játék, korai pontok",
-                        stats: "1. negyed átlag: 52 pont, Utolsó 5: 54 pont/negyed"
-                    },
-                    {
-                        name: "2. negyed - 50 felett pont",
-                        risk: Math.random() > 0.6 ? 'medium' : 'high',
-                        confidence: Math.floor(Math.random() * 20) + 70,
-                        analysis: "Folyamatos támadó játék",
-                        stats: "2. negyed átlag: 48 pont, Utolsó 5: 51 pont/negyed"
+                        stats: "1. negyed átlag: 52 pont, Utolsó 5: 54 pont/negyed",
+                        category: "quarter"
                     },
                     
-                    // KOMBINÁLT KIMENETELEK
+                    // EXTRÉM KIMENETELEK
                     {
-                        name: "Hazai győzelem + 200 felett pont",
-                        risk: Math.random() > 0.7 ? 'medium' : 'high',
-                        confidence: Math.floor(Math.random() * 30) + 55,
-                        analysis: "Hazai dominancia, sok pont",
-                        stats: "Kombinált arány: 45%, Utolsó 5: 2/5"
+                        name: "Döntetlen (hosszabbítás)",
+                        risk: 'extreme',
+                        confidence: 8,
+                        analysis: "EXTRÉM: Kosárlabda döntetlen (nagyon ritka)",
+                        stats: "Extrém kimenetel: 2%, Utolsó 50: 1/50",
+                        category: "extreme",
+                        extreme: true
                     },
                     {
-                        name: "Mindkét csapat 90 felett pont",
-                        risk: Math.random() > 0.6 ? 'medium' : 'high',
-                        confidence: Math.floor(Math.random() * 20) + 70,
-                        analysis: "Kiegyensúlyozott, támadó játék",
-                        stats: "Kombinált arány: 65%, Utolsó 5: 4/5"
+                        name: "Vendég győzelem + 20+ pont",
+                        risk: 'extreme',
+                        confidence: 15,
+                        analysis: "EXTRÉM: Vendég dominancia",
+                        stats: "Extrém kimenetel: 5%, Utolsó 20: 1/20",
+                        category: "extreme",
+                        extreme: true
                     },
                     {
-                        name: "Pontos eredmény: 105-95",
-                        risk: Math.random() > 0.8 ? 'high' : 'high',
-                        confidence: Math.floor(Math.random() * 35) + 45,
-                        analysis: "Hazai győzelem, sok pont",
-                        stats: "105-95 arány: 12%, Utolsó 5: 1/5"
+                        name: "Összes pont - 150 alatt",
+                        risk: 'extreme',
+                        confidence: 12,
+                        analysis: "EXTRÉM: Nagyon lassú játék",
+                        stats: "Extrém kimenetel: 3%, Utolsó 30: 1/30",
+                        category: "extreme",
+                        extreme: true
                     }
                 ];
+                
+                // Csak a legvalószínűbb és extrém kimeneteleket adjuk vissza
+                return allOutcomes.filter(outcome => 
+                    outcome.confidence > 50 || outcome.extreme
+                ).slice(0, 8);
             }
             
             // Tenisz elemzés - Professzionális kimenetelek
