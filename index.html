@@ -513,6 +513,7 @@
                     <input type="text" id="custom-rss-url" placeholder="Egyéni RSS feed URL" class="config-input" style="width: 100%; margin: 10px 0; display: none;">
                     
                     <div>
+                        <button class="config-btn" onclick="addLog('🧪 Teszt gomb működik!', 'success')">🧪 Teszt Gomb</button>
                         <button class="config-btn" onclick="configureSportRSS()">📡 RSS Beállítás</button>
                         <button class="config-btn" onclick="fetchSportRSS()">🔄 RSS Frissítés</button>
                         <button class="config-btn" onclick="startAutomatedFlow()">🚀 Automatikus Folyam</button>
@@ -643,8 +644,13 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
 
         // Sport RSS Feed beállítása
         function configureSportRSS() {
+            addLog('🔧 configureSportRSS() függvény meghívva', 'info');
+            
             const rssType = document.getElementById('rss-type-selector').value;
             const customRssUrl = document.getElementById('custom-rss-url').value;
+            
+            addLog(`📋 RSS Type: ${rssType}`, 'info');
+            addLog(`📋 Custom URL: ${customRssUrl}`, 'info');
             
             let rssUrl = '';
             
@@ -670,8 +676,10 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
             
             if (rssType === 'custom' && customRssUrl) {
                 rssUrl = customRssUrl;
+                addLog('✅ Egyéni RSS URL használata', 'success');
             } else if (predefinedFeeds[rssType]) {
                 rssUrl = predefinedFeeds[rssType];
+                addLog(`✅ Előre definiált RSS URL: ${rssUrl}`, 'success');
             } else {
                 addLog('❌ Kérlek válassz RSS feed típust vagy add meg egyéni URL-t!', 'error');
                 return;
@@ -680,7 +688,14 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
             integrations.sportRSS.rssUrl = rssUrl;
             integrations.sportRSS.rssType = rssType;
             integrations.sportRSS.active = true;
-            document.getElementById('sportRSSStatus').classList.add('active');
+            
+            const statusElement = document.getElementById('sportRSSStatus');
+            if (statusElement) {
+                statusElement.classList.add('active');
+                addLog('✅ Status indicator frissítve', 'success');
+            } else {
+                addLog('⚠️ Status indicator nem található', 'warning');
+            }
             
             addLog('📡 Sport RSS feed beállítva: ' + rssUrl, 'info');
             localStorage.setItem('sportRSSUrl', rssUrl);
