@@ -88,7 +88,7 @@
             background: linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%);
         }
 
-        .integration-card.espn {
+        .integration-card.sport-rss {
             border-color: #dc2626;
             background: linear-gradient(135deg, #fef2f2 0%, #fee2e2 100%);
         }
@@ -469,18 +469,52 @@
                 </div>
             </div>
 
-            <div class="integration-card espn">
+            <div class="integration-card sport-rss">
                 <div class="card-header">
                     <div class="card-icon">📡</div>
-                    <div>ESPN RSS Feed</div>
-                    <div class="status-indicator" id="espnStatus"></div>
+                    <div>Sport RSS Feeds</div>
+                    <div class="status-indicator" id="sportRSSStatus"></div>
                 </div>
                 <div class="card-content">
-                    <p><strong>Valós sportadatok:</strong> ESPN RSS feedek automatikus beolvasása és feldolgozása.</p>
-                    <input type="text" id="espn-rss-url" placeholder="ESPN RSS feed URL" class="config-input" style="width: 100%; margin: 10px 0;">
+                    <p><strong>Európai és nemzetközi sportadatok:</strong> ESPN, BBC, Sky Sports, UEFA, NBA, NHL RSS feedek.</p>
+                    
+                    <select id="rss-type-selector" class="config-input" style="width: 100%; margin: 10px 0;">
+                        <option value="">Válassz RSS feed típust...</option>
+                        <optgroup label="🏈 Futball (Football/Soccer)">
+                            <option value="espn-soccer">ESPN Soccer</option>
+                            <option value="bbc-soccer">BBC Football</option>
+                            <option value="sky-soccer">Sky Sports Football</option>
+                            <option value="uefa-champions">UEFA Champions League</option>
+                            <option value="fifa-news">FIFA News</option>
+                        </optgroup>
+                        <optgroup label="🏀 Kosárlabda (Basketball)">
+                            <option value="espn-basketball">ESPN NBA</option>
+                            <option value="nba-news">NBA Official</option>
+                            <option value="euroleague">EuroLeague</option>
+                            <option value="fiba-basketball">FIBA Basketball</option>
+                        </optgroup>
+                        <optgroup label="🎾 Tenisz (Tennis)">
+                            <option value="espn-tennis">ESPN Tennis</option>
+                            <option value="atp-tennis">ATP Tour</option>
+                            <option value="wta-tennis">WTA Tennis</option>
+                        </optgroup>
+                        <optgroup label="🏒 Jégkorong (Ice Hockey)">
+                            <option value="espn-hockey">ESPN NHL</option>
+                            <option value="nhl-news">NHL Official</option>
+                        </optgroup>
+                        <optgroup label="🌍 Általános Sport">
+                            <option value="espn-soccer">ESPN General</option>
+                            <option value="bbc-sports">BBC Sports</option>
+                            <option value="sky-sports">Sky Sports General</option>
+                        </optgroup>
+                        <option value="custom">Egyéni RSS URL</option>
+                    </select>
+                    
+                    <input type="text" id="custom-rss-url" placeholder="Egyéni RSS feed URL" class="config-input" style="width: 100%; margin: 10px 0; display: none;">
+                    
                     <div>
-                        <button class="config-btn" onclick="configureESPNRSS()">📡 RSS Beállítás</button>
-                        <button class="config-btn" onclick="fetchESPNRSS()">🔄 RSS Frissítés</button>
+                        <button class="config-btn" onclick="configureSportRSS()">📡 RSS Beállítás</button>
+                        <button class="config-btn" onclick="fetchSportRSS()">🔄 RSS Frissítés</button>
                         <button class="config-btn" onclick="startAutomatedFlow()">🚀 Automatikus Folyam</button>
                     </div>
                 </div>
@@ -509,7 +543,7 @@
             <button class="control-btn generate" onclick="generateTestData()">🎲 Teszt Adatok Generálása</button>
             <button class="control-btn claude-test" onclick="claudeAnalysisTest()">🤖 Claude Elemzés Teszt</button>
             <button class="control-btn zapier-flow" onclick="testZapierFlow()">⚡ Teljes Zapier Flow Teszt</button>
-            <button class="control-btn espn-flow" onclick="startAutomatedFlow()" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);">📡 ESPN Automatikus Folyam</button>
+            <button class="control-btn sport-rss-flow" onclick="startAutomatedFlow()" style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);">📡 Sport RSS Automatikus Folyam</button>
             <button class="control-btn test" onclick="testAnalysis()">🧪 Hagyományos Elemzés</button>
             <button class="control-btn clear" onclick="clearData()">🗑️ Összes Törlése</button>
             <button class="control-btn test" onclick="testResultsDisplay()" style="background: linear-gradient(135deg, #ec4899 0%, #be185d 100%);">🎯 Teszt Eredmények Megjelenítése</button>
@@ -550,7 +584,7 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
             claude: { active: false, url: null },
             sheets: { active: false, id: null },
             webhook: { active: false, url: null },
-            espn: { active: false, rssUrl: null }
+            sportRSS: { active: false, rssUrl: null, rssType: null }
         };
 
         // Log funkció
@@ -607,20 +641,50 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
             addLog('📊 Google Sheets sikeresen csatlakoztatva!', 'success');
         }
 
-        // ESPN RSS Feed beállítása
-        function configureESPNRSS() {
-            const espnRssUrl = document.getElementById('espn-rss-url').value;
-            if (!espnRssUrl) {
-                addLog('❌ Kérlek add meg az ESPN RSS feed URL-t!', 'error');
+        // Sport RSS Feed beállítása
+        function configureSportRSS() {
+            const rssType = document.getElementById('rss-type-selector').value;
+            const customRssUrl = document.getElementById('custom-rss-url').value;
+            
+            let rssUrl = '';
+            
+            // Előre definiált RSS feedek
+            const predefinedFeeds = {
+                'espn-soccer': 'https://www.espn.com/espn/rss/soccer/news',
+                'espn-basketball': 'https://www.espn.com/espn/rss/nba/news',
+                'espn-tennis': 'https://www.espn.com/espn/rss/tennis/news',
+                'espn-hockey': 'https://www.espn.com/espn/rss/nhl/news',
+                'bbc-soccer': 'https://feeds.bbci.co.uk/sport/football/rss.xml',
+                'bbc-sports': 'https://feeds.bbci.co.uk/sport/rss.xml',
+                'sky-soccer': 'https://www.skysports.com/rss/0,20514,11661,00.xml',
+                'sky-sports': 'https://www.skysports.com/rss/0,20514,11661,00.xml',
+                'uefa-champions': 'https://www.uefa.com/rssfeed/news/rss.xml',
+                'fifa-news': 'https://www.fifa.com/rss/news.xml',
+                'nba-news': 'https://www.nba.com/rss/news.xml',
+                'nhl-news': 'https://www.nhl.com/rss/news.xml',
+                'atp-tennis': 'https://www.atptour.com/rss/news.xml',
+                'wta-tennis': 'https://www.wtatennis.com/rss/news.xml',
+                'euroleague': 'https://www.euroleague.net/rss/news.xml',
+                'fiba-basketball': 'https://www.fiba.basketball/rss/news.xml'
+            };
+            
+            if (rssType === 'custom' && customRssUrl) {
+                rssUrl = customRssUrl;
+            } else if (predefinedFeeds[rssType]) {
+                rssUrl = predefinedFeeds[rssType];
+            } else {
+                addLog('❌ Kérlek válassz RSS feed típust vagy add meg egyéni URL-t!', 'error');
                 return;
             }
             
-            integrations.espn.rssUrl = espnRssUrl;
-            integrations.espn.active = true;
-            document.getElementById('espnStatus').classList.add('active');
+            integrations.sportRSS.rssUrl = rssUrl;
+            integrations.sportRSS.rssType = rssType;
+            integrations.sportRSS.active = true;
+            document.getElementById('sportRSSStatus').classList.add('active');
             
-            addLog('📡 ESPN RSS feed beállítva: ' + espnRssUrl, 'info');
-            localStorage.setItem('espnRssUrl', espnRssUrl);
+            addLog('📡 Sport RSS feed beállítva: ' + rssUrl, 'info');
+            localStorage.setItem('sportRSSUrl', rssUrl);
+            localStorage.setItem('sportRSSType', rssType);
         }
 
         // Webhook URL generálás
@@ -680,19 +744,20 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
             }, 1500);
         }
 
-        // ESPN RSS Feed beolvasása
-        async function fetchESPNRSS() {
-            if (!integrations.espn.active) {
-                addLog('❌ Először csatlakoztasd az ESPN RSS feed-et!', 'error');
+        // Sport RSS Feed beolvasása
+        async function fetchSportRSS() {
+            if (!integrations.sportRSS.active) {
+                addLog('❌ Először csatlakoztasd a Sport RSS feed-et!', 'error');
                 return;
             }
 
-            addLog('📡 ESPN RSS feed beolvasása...', 'info');
+            addLog('📡 Sport RSS feed beolvasása...', 'info');
             
             try {
-                // CORS proxy használata ESPN RSS eléréséhez
+                // CORS proxy használata RSS eléréséhez
                 const proxyUrl = 'https://api.allorigins.win/raw?url=';
-                const rssUrl = integrations.espn.rssUrl;
+                const rssUrl = integrations.sportRSS.rssUrl;
+                const rssType = integrations.sportRSS.rssType;
                 const response = await fetch(proxyUrl + encodeURIComponent(rssUrl));
                 
                 if (!response.ok) {
@@ -711,31 +776,71 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
                     const description = item.querySelector('description')?.textContent || '';
                     const pubDate = item.querySelector('pubDate')?.textContent || '';
                     
-                    if (title.toLowerCase().includes('vs') || title.toLowerCase().includes('match')) {
+                    // Sportág felismerése a cím alapján
+                    const sportType = detectSportType(title, description, rssType);
+                    
+                    if (title.toLowerCase().includes('vs') || 
+                        title.toLowerCase().includes('match') || 
+                        title.toLowerCase().includes('game') ||
+                        title.toLowerCase().includes('fixture')) {
                         sportsData.push({
                             title: title,
                             description: description,
                             pubDate: pubDate,
-                            source: 'ESPN RSS'
+                            source: rssType.toUpperCase(),
+                            sportType: sportType
                         });
                     }
                 });
                 
-                addLog(`✅ ${sportsData.length} sportesemény betöltve az ESPN RSS-ből`, 'success');
+                addLog(`✅ ${sportsData.length} sportesemény betöltve a ${rssType} RSS-ből`, 'success');
                 return sportsData;
                 
             } catch (error) {
-                addLog('❌ ESPN RSS beolvasási hiba: ' + error.message, 'error');
+                addLog('❌ Sport RSS beolvasási hiba: ' + error.message, 'error');
                 return [];
             }
         }
+
+        // Sportág felismerése
+        function detectSportType(title, description, rssType) {
+            const text = (title + ' ' + description).toLowerCase();
+            
+            if (text.includes('football') || text.includes('soccer') || text.includes('futball') || rssType.includes('soccer')) {
+                return 'football';
+            } else if (text.includes('basketball') || text.includes('kosárlabda') || rssType.includes('basketball')) {
+                return 'basketball';
+            } else if (text.includes('tennis') || text.includes('tenisz') || rssType.includes('tennis')) {
+                return 'tennis';
+            } else if (text.includes('hockey') || text.includes('jégkorong') || rssType.includes('hockey')) {
+                return 'hockey';
+            }
+            
+            return 'unknown';
+        }
+
+        // RSS selector változás kezelése
+        document.addEventListener('DOMContentLoaded', function() {
+            const rssSelector = document.getElementById('rss-type-selector');
+            const customRssInput = document.getElementById('custom-rss-url');
+            
+            if (rssSelector) {
+                rssSelector.addEventListener('change', function() {
+                    if (this.value === 'custom') {
+                        customRssInput.style.display = 'block';
+                    } else {
+                        customRssInput.style.display = 'none';
+                    }
+                });
+            }
+        });
 
         // Automatikus adatfolyam indítása
         async function startAutomatedFlow() {
             addLog('🚀 Automatikus adatfolyam indítása...', 'info');
             
-            // 1. ESPN RSS beolvasása
-            const sportsData = await fetchESPNRSS();
+            // 1. Sport RSS beolvasása
+            const sportsData = await fetchSportRSS();
             if (sportsData.length === 0) {
                 addLog('❌ Nincs sportadatok az RSS feed-ben', 'error');
                 return;
@@ -1225,6 +1330,98 @@ Telekom Veszprém vs MOL Pick Szeged kézilabda"></textarea>
                         stats: "2-1 arány: 30%, Utolsó 10: 3/10"
                     }
                 ];
+            }
+            
+            // Jégkorong elemzés - Professzionális kimenetelek
+            else if (eventLower.includes('jégkorong') || eventLower.includes('hockey') || eventLower.includes('ice hockey')) {
+                const allOutcomes = [
+                    // ALAP KIMENETELEK
+                    {
+                        name: "Hazai Győzelem",
+                        risk: 'low',
+                        confidence: 65,
+                        analysis: "Hazai pálya előny, szurkolói támogatás",
+                        stats: "Hazai forma: 7/10, Utolsó 5: 3W-2L",
+                        category: "basic"
+                    },
+                    {
+                        name: "Vendég Győzelem",
+                        risk: 'medium',
+                        confidence: 50,
+                        analysis: "Vendég csapat erős forma",
+                        stats: "Vendég forma: 6/10, Utolsó 5: 2W-3L",
+                        category: "basic"
+                    },
+                    
+                    // GÓL KIMENETELEK
+                    {
+                        name: "Összes gól - 5.5 felett",
+                        risk: 'medium',
+                        confidence: 60,
+                        analysis: "Támadó játék, sok gól",
+                        stats: "Átlag gólok: 6.2, Utolsó 5: 6.8 gól/mérkőzés",
+                        category: "goals"
+                    },
+                    {
+                        name: "Összes gól - 3.5 alatt",
+                        risk: 'high',
+                        confidence: 35,
+                        analysis: "Védekező játék, erős kapusok",
+                        stats: "Átlag gólok: 3.0, Utolsó 5: 2.8 gól/mérkőzés",
+                        category: "goals"
+                    },
+                    
+                    // PERIODUS KIMENETELEK
+                    {
+                        name: "1. periódus - Hazai győzelem",
+                        risk: 'medium',
+                        confidence: 55,
+                        analysis: "Hazai csapat erős kezdés",
+                        stats: "1. periódus hazai: 50%, Utolsó 5: 3/5",
+                        category: "period"
+                    },
+                    {
+                        name: "1. periódus - Döntetlen",
+                        risk: 'low',
+                        confidence: 70,
+                        analysis: "Kiegyensúlyozott kezdés",
+                        stats: "1. periódus döntetlen: 40%, Utolsó 5: 2/5",
+                        category: "period"
+                    },
+                    
+                    // EXTRÉM KIMENETELEK
+                    {
+                        name: "Döntetlen (hosszabbítás)",
+                        risk: 'extreme',
+                        confidence: 15,
+                        analysis: "EXTRÉM: Jégkorong döntetlen (ritka)",
+                        stats: "Extrém kimenetel: 8%, Utolsó 25: 2/25",
+                        category: "extreme",
+                        extreme: true
+                    },
+                    {
+                        name: "Vendég győzelem + 3+ gól",
+                        risk: 'extreme',
+                        confidence: 20,
+                        analysis: "EXTRÉM: Vendég dominancia",
+                        stats: "Extrém kimenetel: 12%, Utolsó 20: 2/20",
+                        category: "extreme",
+                        extreme: true
+                    },
+                    {
+                        name: "0-0 döntetlen",
+                        risk: 'extreme',
+                        confidence: 8,
+                        analysis: "EXTRÉM: Gól nélküli döntetlen",
+                        stats: "Extrém kimenetel: 3%, Utolsó 30: 1/30",
+                        category: "extreme",
+                        extreme: true
+                    }
+                ];
+                
+                return allOutcomes.filter(outcome => 
+                    outcome.confidence > 45 || outcome.extreme
+                ).slice(0, 7);
             }
             
             // Kézilabda elemzés
